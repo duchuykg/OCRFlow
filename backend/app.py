@@ -10,16 +10,54 @@ from docx import Document
 import openpyxl
 from pptx import Presentation
 
-# Try to import Tesseract
+# Try to import Tesseract and configure path
 try:
     import pytesseract
-    # Uncomment and set correct path if needed:
-    # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-    TESSERACT_AVAILABLE = True
-    print("Tesseract OCR is available")
+    import subprocess
+    
+    # Common Tesseract installation paths on Windows
+    possible_paths = [
+        r'C:\Program Files\Tesseract-OCR\tesseract.exe',
+        r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',
+        r'C:\Users\%USERNAME%\AppData\Local\Programs\Tesseract-OCR\tesseract.exe',
+        'tesseract'  # If it's in PATH
+    ]
+    
+    TESSERACT_AVAILABLE = False
+    
+    for path in possible_paths:
+        try:
+            # Expand environment variables
+            expanded_path = os.path.expandvars(path)
+            
+            if path == 'tesseract':
+                # Test if tesseract is in PATH
+                result = subprocess.run(['tesseract', '--version'], 
+                                      capture_output=True, text=True, timeout=5)
+                if result.returncode == 0:
+                    TESSERACT_AVAILABLE = True
+                    print(f"Tesseract found in PATH")
+                    break
+            else:
+                # Test specific path
+                if os.path.exists(expanded_path):
+                    pytesseract.pytesseract.tesseract_cmd = expanded_path
+                    # Test it works
+                    result = subprocess.run([expanded_path, '--version'], 
+                                          capture_output=True, text=True, timeout=5)
+                    if result.returncode == 0:
+                        TESSERACT_AVAILABLE = True
+                        print(f"Tesseract found at: {expanded_path}")
+                        break
+        except Exception as e:
+            continue
+    
+    if not TESSERACT_AVAILABLE:
+        print("Tesseract installed but not working - check installation")
+        
 except ImportError:
     TESSERACT_AVAILABLE = False
-    print("Tesseract not available - install for image/scan OCR")
+    print("pytesseract not installed")
 
 app = Flask(__name__)
 CORS(app)
@@ -37,6 +75,114 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def clean_vietnamese_text(text):
+    """Clean and normalize Vietnamese OCR text"""
+    import re
+    
+    # Remove excessive whitespace
+    text = re.sub(r'\s+', ' ', text)
+    
+    # Common OCR corrections for Vietnamese
+    corrections = {
+        'ii': 'ì',
+        'ifi': 'ỉ', 
+        'ỉỉ': 'ủ',
+        'rii': 'ủ',
+        'c&n': 'căn',
+        'C&n': 'Căn',
+        'ctr': 'cứ',
+        'Ctr': 'Cứ',
+        'ném': 'năm',
+        'N6i': 'Nội',
+        'n6i': 'nội',
+        'dé': 'đề',
+        'Dé': 'Đề',
+        'nghj': 'nghị',
+        'Nghj': 'Nghị',
+        'ciia': 'của',
+        'Ciia': 'Của',
+        'B6': 'Bộ',
+        'b6': 'bộ',
+        'truvéng': 'trưởng',
+        'Truvéng': 'Trưởng',
+        'héa': 'hóa',
+        'Héa': 'Hóa',
+        "vu'c": 'vực',
+        "Vu'c": 'Vực',
+        'inh': 'lĩnh',
+        'Inh': 'Lĩnh',
+        "vy'c": 'vực',
+        "Vy'c": 'Vực',
+        'ly': 'lý',
+        'Ly': 'Lý',
+        'phat': 'phạt',
+        'Phat': 'Phạt',
+        'hanh': 'hành',
+        'Hanh': 'Hành',
+        'chinh': 'chính',
+        'Chinh': 'Chính',
+        'dinh': 'định',
+        'Dinh': 'Định',
+        'quy': 'quy',
+        'Quy': 'Quy',
+        'xir': 'xử',
+        'Xir': 'Xử',
+        'pham': 'phạm',
+        'Pham': 'Phạm',
+        'lich': 'lịch',
+        'Lich': 'Lịch',
+        'luét': 'luật',
+        'Luét': 'Luật',
+        'chee': 'chức',
+        'Chee': 'Chức',
+        'phi': 'phủ',
+        'Phi': 'Phủ',
+        'lap': 'lập',
+        'Lap': 'Lập',
+        'oc': 'độc',
+        'Oc': 'Độc',
+        'ty': 'tự',
+        'Ty': 'Tự',
+        'phic': 'phúc',
+        'Phic': 'Phúc',
+        'phủc': 'phúc',
+        'Phủc': 'Phúc',
+        't6': 'tổ',
+        'T6': 'Tổ',
+        'Chlĩnh': 'Chính',
+        'chlĩnh': 'chính',
+        'dlĩnh': 'định',
+        'Dlĩnh': 'Định',
+        'vue': 'vực',
+        'Vue': 'Vực',
+        'Luat': 'Luật',
+        'luat': 'luật',
+        'cìa': 'của',
+        'Cìa': 'Của',
+        'Van': 'Văn',
+        'van': 'văn',
+        'Thé': 'Thể',
+        'thé': 'thể',
+        'va': 'và',
+        'Va': 'Và',
+        'ban': 'ban',
+        'Ban': 'Ban',
+        'ngay': 'ngày',
+        'Ngay': 'Ngày',
+        'thang': 'tháng',
+        'Thang': 'Tháng',
+        'nam': 'năm',
+        'Nam': 'Năm',
+        'xu': 'xử',
+        'Xu': 'Xử',
+        'XU': 'XỬ'
+    }
+    
+    for wrong, correct in corrections.items():
+        text = text.replace(wrong, correct)
+    
+    return text.strip()
+
 def extract_text_fallback(file_path, file_extension):
     """Fallback text extraction methods if MarkItDown fails"""
     print(f"Trying fallback for file: {file_path}, extension: {file_extension}")
@@ -48,8 +194,32 @@ def extract_text_fallback(file_path, file_extension):
             
             try:
                 image = Image.open(file_path)
-                text = pytesseract.image_to_string(image, lang='eng')
-                return text if text.strip() else "No text found in image."
+                
+                # Try Vietnamese first, then English, then both
+                languages_to_try = ['vie', 'eng', 'vie+eng']
+                
+                for lang in languages_to_try:
+                    try:
+                        # Configure OCR with better settings for Vietnamese
+                        custom_config = r'--oem 3 --psm 6'
+                        
+                        text = pytesseract.image_to_string(
+                            image, 
+                            lang=lang,
+                            config=custom_config
+                        )
+                        
+                        if text.strip():
+                            print(f"OCR successful with language: {lang}")
+                            return text.strip()
+                    except Exception as lang_error:
+                        print(f"OCR failed with {lang}: {lang_error}")
+                        continue
+                
+                # If all language attempts failed, try basic OCR
+                text = pytesseract.image_to_string(image)
+                return text.strip() if text.strip() else "No text found in image."
+                
             except Exception as e:
                 return f"OCR failed: {str(e)}"
         
