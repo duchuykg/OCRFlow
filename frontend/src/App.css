@@ -1,0 +1,180 @@
+.App {
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.App-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 2.5rem;
+}
+
+.App-header p {
+  margin: 0;
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+.App-main {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background-color: white;
+}
+
+.drop-zone:hover,
+.drop-zone.active {
+  border-color: #007bff;
+  background-color: #f8f9fa;
+}
+
+.file-label {
+  display: block;
+  cursor: pointer;
+  width: 100%;
+}
+
+.file-label p {
+  margin: 10px 0;
+  font-size: 1.1rem;
+}
+
+.file-label p:first-child {
+  font-weight: bold;
+  color: #333;
+}
+
+.file-label p:last-child {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.convert-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.convert-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.convert-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.result-section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.result-header h3 {
+  margin: 0;
+  color: #333;
+  text-align: left;
+}
+
+.copy-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.copy-button:hover {
+  background-color: #218838;
+}
+
+.result-text {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #f5c6cb;
+}
+
+.error h3 {
+  margin: 0 0 10px 0;
+}
+
+.error p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .App {
+    padding: 10px;
+  }
+  
+  .App-header h1 {
+    font-size: 2rem;
+  }
+  
+  .drop-zone {
+    padding: 20px;
+  }
+  
+  .result-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+}
